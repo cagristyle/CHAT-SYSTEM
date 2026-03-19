@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Paddock Türkiye Chat</title>
+
+<style>
+body {
+  background: #0f172a;
+  color: white;
+  font-family: Arial;
+  text-align: center;
+}
+
+#chat {
+  height: 350px;
+  overflow-y: auto;
+  background: #1e293b;
+  padding: 10px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.msg {
+  background: #334155;
+  padding: 8px;
+  border-radius: 8px;
+  margin: 5px 0;
+}
+
+.name {
+  color: #22c55e;
+  font-weight: bold;
+}
+
+input {
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  margin: 5px;
+  width: 40%;
+}
+
+button {
+  padding: 10px 15px;
+  background: #22c55e;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #16a34a;
+}
+</style>
+</head>
+
+<body>
+
+<h2>🏎️ Paddock Türkiye Chat</h2>
+
+<div id="chat"></div>
+
+<input id="name" placeholder="İsmin"><br>
+<input id="msg" placeholder="Mesaj yaz..." onkeypress="if(event.key==='Enter') send()">
+<button onclick="send()">Gönder</button>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<script>
+var firebaseConfig = {
+  apiKey: "AIzaSyAAZIGcJ7kSE2GStl9JGY4U7e9X8WRHnJU",
+  databaseURL: "https://chat-575c6-default-rtdb.europe-west1.firebasedatabase.app"
+};
+
+firebase.initializeApp(firebaseConfig);
+var db = firebase.database();
+
+// İsim kaydet (her sefer yazmasın)
+document.getElementById("name").value = localStorage.getItem("name") || "";
+
+function send() {
+  var name = document.getElementById("name").value;
+  var msg = document.getElementById("msg").value;
+
+  if(name === "" || msg === "") return;
+
+  localStorage.setItem("name", name);
+
+  db.ref("messages").push({
+    name: name,
+    msg: msg,
+    time: Date.now()
+  });
+
+  document.getElementById("msg").value = "";
+}
+
+// Mesajları çek
+db.ref("messages").on("child_added", function(snapshot) {
+  var data = snapshot.val();
+
+  var div = document.createElement("div");
+  div.className = "msg";
+  div.innerHTML = "<span class='name'>" + data.name + ":</span> " + data.msg;
+
+  document.getElementById("chat").appendChild(div);
+
+  // otomatik scroll
+  var chatBox = document.getElementById("chat");
+  chatBox.scrollTop = chatBox.scrollHeight;
+});
+</script>
+
+</body>
+</html>
